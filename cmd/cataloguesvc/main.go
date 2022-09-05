@@ -111,15 +111,15 @@ func main() {
 	// Service domain.
 	var service catalogue.Service
 	{
-		service = catalogue.NewCatalogueService(db, logger)
-		service = catalogue.LoggingMiddleware(logger)(service)
+		service = catalogue.NewCatalogueService(db, logger) //service
+		service = catalogue.LoggingMiddleware(logger)(service) //logging
 	}
 
 	// Endpoint domain.
-	endpoints := catalogue.MakeEndpoints(service, tracer)
+	endpoints := catalogue.MakeEndpoints(service, tracer) //endpoints
 
 	// HTTP router
-	router := catalogue.MakeHTTPHandler(ctx, endpoints, *images, logger, tracer)
+	router := catalogue.MakeHTTPHandler(ctx, endpoints, *images, logger, tracer) //transport
 
 	httpMiddleware := []middleware.Interface{
 		middleware.Instrument{

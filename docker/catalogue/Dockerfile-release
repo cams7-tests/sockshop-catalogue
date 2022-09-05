@@ -1,38 +1,20 @@
-FROM golang:1.15.15-alpine3.14
+FROM golang:1.19.0-alpine3.16
 
 COPY . /go/src/github.com/microservices-demo/catalogue
 WORKDIR /go/src/github.com/microservices-demo/catalogue
 
-RUN apk update && apk add --no-cache git
-RUN git config --global http.sslVerify false
-RUN rm -f /go/src/github.com/microservices-demo/catalogue/go.mod
+#RUN apk update && apk add --no-cache gcc libc-dev
 RUN rm -f /go/src/github.com/microservices-demo/catalogue/go.sum
-RUN go get -u github.com/FiloSottile/gvt
-RUN gvt restore && \
-    CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /app github.com/microservices-demo/catalogue/cmd/cataloguesvc
+RUN go mod tidy && go mod vendor
+#RUN go test
+RUN cd /go/src/github.com/microservices-demo/catalogue/cmd/cataloguesvc && go install
 
-FROM alpine:3.14
-
-#ENV	SERVICE_USER=myuser \
-#	SERVICE_UID=10001 \
-#	SERVICE_GROUP=mygroup \
-#	SERVICE_GID=10001
-
-#RUN apk update && apk add --no-cache mysql-client
-#RUN	addgroup -g ${SERVICE_GID} ${SERVICE_GROUP} && \
-#	adduser -g "${SERVICE_NAME} user" -D -H -G ${SERVICE_GROUP} -s /sbin/nologin -u ${SERVICE_UID} ${SERVICE_USER} && \
-#  apk add --update libcap
+FROM alpine:3.16
 
 WORKDIR /
 EXPOSE 80
-COPY --from=0 /app /app
+COPY --from=0 /go/bin/cataloguesvc /app
 COPY images/ /images/
-
-#RUN	chmod +x /app && \
-#	chown -R ${SERVICE_USER}:${SERVICE_GROUP} /app /images && \
-#  setcap 'cap_net_bind_service=+ep' /app
-
-#USER ${SERVICE_USER}
 
 ARG BUILD_DATE
 ARG BUILD_VERSION
@@ -43,9 +25,9 @@ LABEL org.label-schema.vendor="Weaveworks" \
   org.label-schema.version="${BUILD_VERSION}" \
   org.label-schema.name="Socks Shop: Catalogue" \
   org.label-schema.description="REST API for Catalogue service" \
-  org.label-schema.url="https://github.com/microservices-demo/catalogue" \
-  org.label-schema.vcs-url="github.com:microservices-demo/catalogue.git" \
+  org.label-schema.url="https://github.com/cams7-tests/sockshop-catalogue" \
+  org.label-schema.vcs-url="github.com/cams7-tests/sockshop-catalogue.git" \
   org.label-schema.vcs-ref="${COMMIT}" \
-  org.label-schema.schema-version="1.0"
+  org.label-schema.schema-version="1.0.0"
 
 CMD ["/app", "-port=80"]
