@@ -3,10 +3,10 @@ FROM golang:1.19.0-alpine3.16
 COPY . /go/src/github.com/microservices-demo/catalogue
 WORKDIR /go/src/github.com/microservices-demo/catalogue
 
-#RUN apk update && apk add --no-cache gcc libc-dev
+RUN apk update && apk add --no-cache gcc libc-dev
 RUN rm -f /go/src/github.com/microservices-demo/catalogue/go.sum
 RUN go mod tidy && go mod vendor
-#RUN go test
+RUN go test
 RUN cd /go/src/github.com/microservices-demo/catalogue/cmd/cataloguesvc && go install
 
 FROM alpine:3.16
@@ -28,6 +28,6 @@ LABEL org.label-schema.vendor="Weaveworks" \
   org.label-schema.url="https://github.com/cams7-tests/sockshop-catalogue" \
   org.label-schema.vcs-url="github.com/cams7-tests/sockshop-catalogue.git" \
   org.label-schema.vcs-ref="${COMMIT}" \
-  org.label-schema.schema-version="1.0.0"
+  org.label-schema.schema-version="1.0.1"
 
 CMD ["/app", "-port=80"]

@@ -132,7 +132,6 @@ func TestCatalogueServiceCount(t *testing.T) {
 			t.Errorf(
 				"Count(%v): returned error %s",
 				testcase.tags, err.Error(),
-				err.Error(),
 			)
 		}
 		if want := testcase.want; want != have {
