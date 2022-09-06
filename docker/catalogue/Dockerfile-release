@@ -28,6 +28,6 @@ LABEL org.label-schema.vendor="Weaveworks" \
   org.label-schema.url="https://github.com/cams7-tests/sockshop-catalogue" \
   org.label-schema.vcs-url="github.com/cams7-tests/sockshop-catalogue.git" \
   org.label-schema.vcs-ref="${COMMIT}" \
-  org.label-schema.schema-version="1.0.2"
+  org.label-schema.schema-version="1.0.3"
 
 CMD ["/app", "-port=80"]

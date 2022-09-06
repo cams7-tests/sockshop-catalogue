@@ -55,6 +55,9 @@ var ErrDBConnection = errors.New("database connection error")
 
 var baseQuery = "SELECT sock.sock_id AS id, sock.name, sock.description, sock.price, sock.count, sock.image_url_1, sock.image_url_2, array_to_string(array_agg(tag.name), ',') AS tag_name FROM sock JOIN sock_tag ON sock.sock_id=sock_tag.sock_id JOIN tag ON sock_tag.tag_id=tag.tag_id"
 
+var DEFAULT_PAGE_NUM = 1
+var DEFAULT_PAGE_SIZE = 100
+
 // NewCatalogueService returns an implementation of the Service interface,
 // with connection to an SQL database.
 func NewCatalogueService(db *sqlx.DB, logger log.Logger) Service {
@@ -91,7 +94,7 @@ func (s *catalogueService) List(tags []string, order string, pageNum, pageSize i
 		query += fmt.Sprintf(" ORDER BY %s ASC", order)
 	}
 
-	query += ";"
+	query += pagination(pageNum, pageSize) + ";"
 
 	err := s.db.Select(&socks, query, args...)
 	if err != nil {
@@ -102,8 +105,6 @@ func (s *catalogueService) List(tags []string, order string, pageNum, pageSize i
 		socks[i].ImageURL = []string{s.ImageURL_1, s.ImageURL_2}
 		socks[i].Tags = strings.Split(s.TagString, ",")
 	}
-
-	socks = cut(socks, pageNum, pageSize)
 
 	return socks, nil
 }
@@ -198,26 +199,16 @@ func (s *catalogueService) Tags() ([]string, error) {
 	return tags, nil
 }
 
-func cut(socks []Sock, pageNum, pageSize int) []Sock {
-	if pageNum == 0 || pageSize == 0 {
-		return []Sock{} // pageNum is 1-indexed
+func pagination(pageNum, pageSize int) string {
+	if pageNum < 1 {
+		pageNum = DEFAULT_PAGE_NUM
 	}
-	start := (pageNum * pageSize) - pageSize
-	if start > len(socks) {
-		return []Sock{}
+	if pageSize < 1 {
+		pageSize = DEFAULT_PAGE_SIZE
 	}
-	end := (pageNum * pageSize)
-	if end > len(socks) {
-		end = len(socks)
-	}
-	return socks[start:end]
+	return fmt.Sprintf(" LIMIT %d OFFSET %d", pageSize, offset(pageNum, pageSize))
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
+func offset(pageNum, pageSize int) int {
+	return ((pageNum - 1) * pageSize)
 }

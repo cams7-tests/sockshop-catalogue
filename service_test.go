@@ -80,9 +80,9 @@ func TestCatalogueServiceList(t *testing.T) {
 		{
 			tags:     []string{"odd"},
 			order:    "id",
-			pageNum:  2,
-			pageSize: 2,
-			want:     []Sock{s5},
+			pageNum:  1,
+			pageSize: 5,
+			want:     []Sock{s1, s3, s5},
 		},
 	} {
 		have, err := s.List(testcase.tags, testcase.order, testcase.pageNum, testcase.pageSize)
@@ -213,48 +213,4 @@ func TestCatalogueServiceTags(t *testing.T) {
 	if !reflect.DeepEqual(tags, have) {
 		t.Errorf("Tags(): want %v, have %v", tags, have)
 	}
-}
-
-func TestCut(t *testing.T) {
-	for _, testcase := range []struct {
-		pageNum  int
-		pageSize int
-		want     []Sock
-	}{
-		{0, 1, []Sock{}}, // pageNum 0 is invalid
-		{1, 0, []Sock{}}, // pageSize 0 is invalid
-		{1, 1, []Sock{s1}},
-		{1, 2, []Sock{s1, s2}},
-		{1, 5, []Sock{s1, s2, s3, s4, s5}},
-		{1, 9, []Sock{s1, s2, s3, s4, s5}},
-		{2, 0, []Sock{}},
-		{2, 1, []Sock{s2}},
-		{2, 2, []Sock{s3, s4}},
-		{2, 3, []Sock{s4, s5}},
-		{2, 4, []Sock{s5}},
-		{2, 5, []Sock{}},
-		{2, 6, []Sock{}},
-		{3, 0, []Sock{}},
-		{3, 1, []Sock{s3}},
-		{3, 2, []Sock{s5}},
-		{3, 3, []Sock{}},
-		{4, 1, []Sock{s4}},
-		{4, 2, []Sock{}},
-	} {
-		have := cut(socks, testcase.pageNum, testcase.pageSize)
-		if want := testcase.want; !reflect.DeepEqual(want, have) {
-			t.Errorf("cut(%d, %d): want %s, have %s", testcase.pageNum, testcase.pageSize, printIDs(want), printIDs(have))
-		}
-	}
-}
-
-// Make test output nicer: just print sock IDs.
-type printIDs []Sock
-
-func (s printIDs) String() string {
-	ids := make([]string, len(s))
-	for i, ss := range s {
-		ids[i] = ss.ID
-	}
-	return "[" + strings.Join(ids, ", ") + "]"
 }
