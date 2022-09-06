@@ -4,9 +4,9 @@ go 1.19
 
 require (
 	github.com/go-kit/kit v0.3.1-0.20170117214239-bbb2306ec131
-	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gorilla/mux v0.0.0-20160920230813-757bef944d0f
 	github.com/jmoiron/sqlx v1.3.5
+	github.com/lib/pq v1.2.0
 	github.com/opentracing/opentracing-go v1.0.1-0.20161231212324-5e5abf838007
 	github.com/openzipkin/zipkin-go-opentracing v0.2.2
 	github.com/prometheus/client_golang v0.8.1-0.20161124155732-575f371f7862

@@ -4,6 +4,7 @@ package catalogue
 // catalogue service. Everything here is agnostic to the transport (HTTP).
 
 import (
+	"fmt"
 	"errors"
 	"strings"
 	"time"
@@ -52,7 +53,7 @@ var ErrNotFound = errors.New("not found")
 // ErrDBConnection is returned when connection with the database fails.
 var ErrDBConnection = errors.New("database connection error")
 
-var baseQuery = "SELECT sock.sock_id AS id, sock.name, sock.description, sock.price, sock.count, sock.image_url_1, sock.image_url_2, GROUP_CONCAT(tag.name) AS tag_name FROM sock JOIN sock_tag ON sock.sock_id=sock_tag.sock_id JOIN tag ON sock_tag.tag_id=tag.tag_id"
+var baseQuery = "SELECT sock.sock_id AS id, sock.name, sock.description, sock.price, sock.count, sock.image_url_1, sock.image_url_2, array_to_string(array_agg(tag.name), ',') AS tag_name FROM sock JOIN sock_tag ON sock.sock_id=sock_tag.sock_id JOIN tag ON sock_tag.tag_id=tag.tag_id"
 
 // NewCatalogueService returns an implementation of the Service interface,
 // with connection to an SQL database.
@@ -76,10 +77,10 @@ func (s *catalogueService) List(tags []string, order string, pageNum, pageSize i
 
 	for i, t := range tags {
 		if i == 0 {
-			query += " WHERE tag.name=?"
+			query += " WHERE tag.name=$1"
 			args = append(args, t)
 		} else {
-			query += " OR tag.name=?"
+			query += fmt.Sprintf(" OR tag.name=$%d", i + 1)
 			args = append(args, t)
 		}
 	}
@@ -87,8 +88,7 @@ func (s *catalogueService) List(tags []string, order string, pageNum, pageSize i
 	query += " GROUP BY id"
 
 	if order != "" {
-		query += " ORDER BY ?"
-		args = append(args, order)
+		query += fmt.Sprintf(" ORDER BY %s ASC", order)
 	}
 
 	query += ";"
@@ -115,10 +115,10 @@ func (s *catalogueService) Count(tags []string) (int, error) {
 
 	for i, t := range tags {
 		if i == 0 {
-			query += " WHERE tag.name=?"
+			query += " WHERE tag.name=$1"
 			args = append(args, t)
 		} else {
-			query += " OR tag.name=?"
+			query += fmt.Sprintf(" OR tag.name=$%d", i + 1)
 			args = append(args, t)
 		}
 	}
@@ -145,7 +145,7 @@ func (s *catalogueService) Count(tags []string) (int, error) {
 }
 
 func (s *catalogueService) Get(id string) (Sock, error) {
-	query := baseQuery + " WHERE sock.sock_id =? GROUP BY sock.sock_id;"
+	query := baseQuery + " WHERE sock.sock_id=$1 GROUP BY id;"
 
 	var sock Sock
 	err := s.db.Get(&sock, query, id)

@@ -1,8 +1,11 @@
-FROM mysql:5.7.38
+FROM postgres:14.5
 
-# ENV MYSQL_ROOT_PASSWORD DEFAULT_PASS
-# ENV MYSQL_ALLOW_EMPTY_PASSWORD=true
-# ENV MYSQL_DATABASE=socksdb
+ENV POSTGRES_USER=postgres
+ENV POSTGRES_PASSWORD=postgrespass
+ENV CATALOGUE_DB_USER=catalogue_user
+ENV CATALOGUE_DB_PASS=default_password
+ENV CATALOGUE_DB_NAME=socksdb
 
-COPY ./data/dump.sql /docker-entrypoint-initdb.d/
+COPY ./data/dump.sql /tmp/
+COPY ./data/create-db.sh /docker-entrypoint-initdb.d/
 

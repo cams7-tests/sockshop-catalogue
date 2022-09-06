@@ -15,8 +15,8 @@ import (
 
 	"path/filepath"
 
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
+    _ "github.com/lib/pq"
+    "github.com/jmoiron/sqlx"
 	"github.com/microservices-demo/catalogue"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/weaveworks/common/middleware"
@@ -43,7 +43,7 @@ func main() {
 	var (
 		port   = flag.String("port", "8081", "Port to bind HTTP listener") // TODO(pb): should be -addr, default ":8081"
 		images = flag.String("images", "./images/", "Image path")
-		dsn    = flag.String("DSN", os.Getenv("MYSQL_CONNECTION_STRING"), "Data Source Name: [username[:password]@][protocol[(address)]]/dbname")
+		dsn    = flag.String("DSN", os.Getenv("POSTGRES_CONNECTION_STRING"), "Data Source Name: host=[host] port=[port] user=[user] password=[password] dbname=[dbname] sslmode=disable")
 		zip    = flag.String("zipkin", os.Getenv("ZIPKIN"), "Zipkin address")
 	)
 	flag.Parse()
@@ -95,7 +95,7 @@ func main() {
 	}
 
 	// Data domain.
-	db, err := sqlx.Open("mysql", *dsn)
+	db, err := sqlx.Open("postgres", *dsn)	
 	if err != nil {
 		logger.Log("err", err)
 		os.Exit(1)
