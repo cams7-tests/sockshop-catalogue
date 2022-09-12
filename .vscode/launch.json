@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Launch file",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/cmd/cataloguesvc",
+            "env": {},
+            "args": [],
+            "showLog": true
+        }
+    ]
+}

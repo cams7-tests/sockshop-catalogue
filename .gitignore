@@ -1,7 +1,4 @@
-docker/catalogue/
-__pycache__/
-vendor/**
-!vendor/manifest
-coverage.out
+vendor
 go.sum
 .history/
+__debug_bin
